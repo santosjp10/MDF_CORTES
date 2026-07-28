@@ -27,14 +27,17 @@ jobs:
     - name: Instalar dependências Node
       run: npm install
 
+    - name: Criar diretório de assets
+      run: mkdir -p www/assets/js
+
+    - name: Baixar jsPDF (offline)
+      run: curl -L -o www/assets/js/jspdf.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
+
     - name: Adicionar plataforma Android (se necessário)
       run: npx cap add android
 
     - name: Sincronizar web assets com Android
       run: npx cap sync android
-
-    - name: Baixar jsPDF (offline)
-      run: curl -L -o www/assets/js/jspdf.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
 
     - name: Dar permissão de execução ao Gradle
       run: chmod +x android/gradlew
