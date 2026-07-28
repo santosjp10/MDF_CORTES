@@ -2,48 +2,201 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Otimizador de Corte de Chapas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Otimizador de Corte</title>
     <script src="assets/js/jspdf.umd.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; }
-        .container { max-width: 1300px; margin: 0 auto; padding: 20px; }
-        h1 { text-align: center; margin-bottom: 20px; color: #1a3e72; }
-        .panel { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .flex-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
-        .form-group { display: flex; flex-direction: column; min-width: 120px; }
-        label { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
-        input, select { padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        button { padding: 10px 16px; background: #1a3e72; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
-        button:hover { background: #0f2a50; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f0f2f5; 
+            color: #333; 
+            font-size: 14px; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        .container { 
+            max-width: 100%; 
+            margin: 0 auto; 
+            padding: 10px; 
+        }
+        h1 { 
+            text-align: center; 
+            margin: 10px 0 15px; 
+            color: #1a3e72; 
+            font-size: 22px; 
+        }
+        .panel { 
+            background: #fff; 
+            border-radius: 10px; 
+            padding: 15px; 
+            margin-bottom: 12px; 
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08); 
+        }
+        .panel h3 { 
+            font-size: 16px; 
+            margin-bottom: 10px; 
+            color: #1a3e72; 
+        }
+        .flex-row { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            align-items: flex-end; 
+        }
+        .form-group { 
+            display: flex; 
+            flex-direction: column; 
+            min-width: 80px; 
+            flex: 1 1 auto; 
+        }
+        .form-group label { 
+            font-weight: 600; 
+            margin-bottom: 4px; 
+            font-size: 13px; 
+        }
+        .form-group input, 
+        .form-group select { 
+            padding: 10px 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            width: 100%; 
+            background: #fff;
+        }
+        button { 
+            padding: 10px 14px; 
+            background: #1a3e72; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 14px; 
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        button:active { background: #0f2a50; }
         button.danger { background: #c0392b; }
-        button.danger:hover { background: #a93226; }
+        button.danger:active { background: #a93226; }
         button.success { background: #27ae60; }
-        button.success:hover { background: #1e8449; }
+        button.success:active { background: #1e8449; }
         button.secondary { background: #7f8c8d; }
-        button.secondary:hover { background: #6c7a7d; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background: #f8f9fa; }
-        .btn-small { padding: 4px 8px; font-size: 12px; margin: 0 2px; }
-        .canvas-container { overflow-x: auto; margin-top: 20px; text-align: center; }
-        canvas { border: 1px solid #ccc; background: #fff; max-width: 100%; }
-        .stats { margin-top: 10px; font-weight: bold; background: #eaf2f8; padding: 10px; border-radius: 4px; }
-        .project-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-        .csv-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
-        .footer { text-align: center; margin-top: 30px; padding: 15px 0; border-top: 1px solid #ddd; color: #555; font-size: 13px; line-height: 1.6; }
+        button.secondary:active { background: #6c7a7d; }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px; 
+            font-size: 13px; 
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 6px 4px; 
+            text-align: center; 
+        }
+        th { background: #f8f9fa; font-weight: 600; }
+        .btn-small { 
+            padding: 4px 8px; 
+            font-size: 12px; 
+            margin: 2px; 
+            border-radius: 4px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 5px;
+        }
+        .csv-actions { 
+            margin-top: 8px; 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap; 
+        }
+        .canvas-container { 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch; 
+            margin-top: 10px; 
+            text-align: center; 
+        }
+        canvas { 
+            border: 1px solid #ccc; 
+            background: #fff; 
+            max-width: 100%; 
+            height: auto; 
+        }
+        .stats { 
+            margin-top: 8px; 
+            font-weight: bold; 
+            background: #eaf2f8; 
+            padding: 10px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            text-align: center; 
+        }
+        .project-actions { 
+            display: flex; 
+            gap: 8px; 
+            flex-wrap: wrap; 
+        }
+        .footer { 
+            text-align: center; 
+            margin-top: 20px; 
+            padding: 12px 0; 
+            border-top: 1px solid #ddd; 
+            color: #555; 
+            font-size: 12px; 
+            line-height: 1.5; 
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        /* Mobile especifico */
+        @media (max-width: 600px) {
+            .flex-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .form-group {
+                min-width: 100%;
+            }
+            button {
+                width: 100%;
+                padding: 12px;
+                font-size: 15px;
+            }
+            .csv-actions button {
+                flex: 1;
+            }
+            .project-actions button {
+                flex: 1;
+            }
+            .action-buttons button {
+                flex: 1;
+            }
+            h1 { font-size: 20px; }
+            .panel { padding: 12px; }
+            table { font-size: 12px; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>📐 Otimizador de Corte de Chapas</h1>
+    <h1>📐 Otimizador de Corte</h1>
 
+    <!-- Configuração -->
     <div class="panel">
         <h3>⚙️ Configuração</h3>
         <div class="flex-row">
             <div class="form-group">
-                <label>Folga da serra (kerf) mm</label>
+                <label>Folga da serra (mm)</label>
                 <input type="number" id="kerf" value="3" step="0.1" min="0">
             </div>
             <div class="form-group">
@@ -54,6 +207,7 @@
         </div>
     </div>
 
+    <!-- Chapas -->
     <div class="panel">
         <h3>🟫 Chapas Disponíveis</h3>
         <div class="flex-row">
@@ -61,22 +215,25 @@
             <div class="form-group"><label>Comprimento (mm)</label><input type="number" id="chapaComprimento" value="1830" step="1"></div>
             <div class="form-group"><label>Espessura (mm)</label><input type="number" id="chapaEspessura" value="15" step="0.1"></div>
             <div class="form-group"><label>Quantidade</label><input type="number" id="chapaQuantidade" value="5" min="1"></div>
-            <button onclick="adicionarChapa()">+ Adicionar Chapa</button>
+            <button onclick="adicionarChapa()" style="align-self: flex-end;">➕ Adicionar</button>
         </div>
-        <table id="tabelaChapas">
-            <thead><tr><th>Largura</th><th>Comprimento</th><th>Espessura</th><th>Qtd</th><th>Ações</th></tr></thead>
-            <tbody></tbody>
-        </table>
+        <div class="table-wrapper">
+            <table id="tabelaChapas">
+                <thead><tr><th>Larg</th><th>Comp</th><th>Esp</th><th>Qtd</th><th></th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
         <div class="csv-actions">
-            <button class="secondary" onclick="exportarCSV('chapas')">📤 Exportar Chapas CSV</button>
-            <button class="secondary" onclick="importarCSV('chapas')">📥 Importar Chapas CSV</button>
+            <button class="secondary" onclick="exportarCSV('chapas')">📤 Exportar CSV</button>
+            <button class="secondary" onclick="importarCSV('chapas')">📥 Importar CSV</button>
         </div>
     </div>
 
+    <!-- Peças -->
     <div class="panel">
         <h3>🧩 Peças a Cortar</h3>
         <div class="flex-row">
-            <div class="form-group"><label>Nome</label><input type="text" id="pecaNome" placeholder="Ex: Lateral Esq." style="width:150px;"></div>
+            <div class="form-group"><label>Nome</label><input type="text" id="pecaNome" placeholder="Ex: Lateral Esq."></div>
             <div class="form-group"><label>Largura (mm)</label><input type="number" id="pecaLargura" value="600" step="1"></div>
             <div class="form-group"><label>Comprimento (mm)</label><input type="number" id="pecaComprimento" value="400" step="1"></div>
             <div class="form-group"><label>Quantidade</label><input type="number" id="pecaQuantidade" value="10" min="1"></div>
@@ -84,45 +241,51 @@
             <div class="form-group">
                 <label>Orientação</label>
                 <select id="pecaOrientacao">
-                    <option value="livre">Livre (girar 90°)</option>
-                    <option value="fixa">Fixa (sem rotação)</option>
+                    <option value="livre">Livre (girar)</option>
+                    <option value="fixa">Fixa</option>
                 </select>
             </div>
-            <button onclick="adicionarPeca()">+ Adicionar Peça</button>
+            <button onclick="adicionarPeca()" style="align-self: flex-end;">➕ Adicionar</button>
         </div>
-        <table id="tabelaPecas">
-            <thead><tr><th>Nome</th><th>Largura</th><th>Comprimento</th><th>Espessura</th><th>Qtd</th><th>Orientação</th><th>Ações</th></tr></thead>
-            <tbody></tbody>
-        </table>
+        <div class="table-wrapper">
+            <table id="tabelaPecas">
+                <thead><tr><th>Nome</th><th>Larg</th><th>Comp</th><th>Esp</th><th>Qtd</th><th>Ori.</th><th></th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
         <div class="csv-actions">
-            <button class="secondary" onclick="exportarCSV('pecas')">📤 Exportar Peças CSV</button>
-            <button class="secondary" onclick="importarCSV('pecas')">📥 Importar Peças CSV</button>
+            <button class="secondary" onclick="exportarCSV('pecas')">📤 Exportar CSV</button>
+            <button class="secondary" onclick="importarCSV('pecas')">📥 Importar CSV</button>
         </div>
     </div>
 
+    <!-- Projeto -->
     <div class="panel">
         <h3>💾 Projeto</h3>
         <div class="project-actions">
-            <button onclick="salvarProjeto()">💾 Salvar Projeto</button>
-            <button onclick="carregarProjeto()">📂 Carregar Projeto</button>
-            <button class="danger" onclick="limparTudo()">🗑️ Limpar Tudo</button>
+            <button onclick="salvarProjeto()">💾 Salvar</button>
+            <button onclick="carregarProjeto()">📂 Carregar</button>
+            <button class="danger" onclick="limparTudo()">🗑️ Limpar</button>
         </div>
     </div>
 
-    <div class="panel" style="text-align: center;">
-        <button onclick="otimizar()" style="font-size: 18px; padding: 12px 30px;">🔍 Otimizar Corte</button>
-        <button onclick="reotimizar()" style="font-size: 18px; padding: 12px 30px; margin-left: 10px;">🔄 Reotimizar</button>
-        <button onclick="exportarPDF()" style="font-size: 18px; padding: 12px 30px; margin-left: 10px;" class="success">📄 Exportar PDF</button>
+    <!-- Ações principais -->
+    <div class="action-buttons">
+        <button onclick="otimizar()" style="font-size: 16px; padding: 14px;">🔍 Otimizar Corte</button>
+        <button onclick="reotimizar()" style="font-size: 16px; padding: 14px;">🔄 Reotimizar</button>
+        <button onclick="exportarPDF()" class="success" style="font-size: 16px; padding: 14px;">📄 Exportar PDF</button>
     </div>
 
+    <!-- Resultado -->
     <div class="panel" id="resultadoPanel" style="display: none;">
-        <h3>📊 Resultado do Plano de Corte</h3>
+        <h3>📊 Plano de Corte</h3>
         <div id="estatisticas" class="stats"></div>
         <div class="canvas-container">
             <canvas id="canvasCorte"></canvas>
         </div>
     </div>
 
+    <!-- Créditos -->
     <div class="footer">
         <strong>Desenvolvido por J. P. Santos</strong><br>
         Contato: <a href="mailto:santosjp10@gmail.com" style="color: #1a3e72;">santosjp10@gmail.com</a><br>
@@ -163,7 +326,7 @@
         chapas.forEach(ch => {
             tbody.innerHTML += `<tr>
                 <td>${ch.largura}</td><td>${ch.comprimento}</td><td>${ch.espessura}</td><td>${ch.quantidade}</td>
-                <td><button class="btn-small danger" onclick="removerChapa(${ch.id})">Remover</button></td>
+                <td><button class="btn-small danger" onclick="removerChapa(${ch.id})">✖</button></td>
             </tr>`;
         });
     }
@@ -202,7 +365,7 @@
             tbody.innerHTML += `<tr>
                 <td>${p.nome}</td><td>${p.largura}</td><td>${p.comprimento}</td><td>${p.espessura}</td><td>${p.quantidade}</td>
                 <td>${p.orientacao === 'livre' ? 'Livre' : 'Fixa'}</td>
-                <td><button class="btn-small danger" onclick="removerPeca(${p.id})">Remover</button></td>
+                <td><button class="btn-small danger" onclick="removerPeca(${p.id})">✖</button></td>
             </tr>`;
         });
     }
@@ -453,7 +616,6 @@
             }
         }
 
-        // Ordenações inteligentes
         const orders = [
             [...baseRects].sort((a, b) => (b.width * b.height) - (a.width * a.height)),
             [...baseRects].sort((a, b) => Math.max(b.width, b.height) - Math.max(a.width, a.height)),
@@ -465,7 +627,6 @@
             if (bestBinsUsed === 1 && bestAreaUtil > 0.999) return bestSolution;
         }
 
-        // Tentativas aleatórias
         function shuffle(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -541,18 +702,30 @@
         melhorSolucaoGlobal = todosPlanos;
         desenharResultado(todosPlanos, kerf);
         document.getElementById('resultadoPanel').style.display = 'block';
+        // Scroll suave para o resultado
+        document.getElementById('resultadoPanel').scrollIntoView({ behavior: 'smooth' });
     }
 
     function reotimizar() { otimizar(); }
 
-    // ========== DESENHO ==========
+    // ========== DESENHO (otimizado para mobile) ==========
     function desenharResultado(planos, kerf) {
         canvas = document.getElementById('canvasCorte');
         ctx = canvas.getContext('2d');
-        let totalHeight = 0, maxWidth = 0;
-        planos.forEach(p => p.bins.forEach(b => { maxWidth = Math.max(maxWidth, b.width); totalHeight += b.height + 30; }));
-        let escala = maxWidth > 1200 ? 1200 / maxWidth : 1;
-        canvas.width = maxWidth * escala + 350;
+
+        // Largura disponível na tela (considerando padding do container)
+        const containerWidth = Math.min(window.innerWidth - 24, 1200); // margens
+        let totalHeight = 0, maxBinWidth = 0;
+        planos.forEach(p => p.bins.forEach(b => { 
+            maxBinWidth = Math.max(maxBinWidth, b.width); 
+            totalHeight += b.height + 30; 
+        }));
+
+        // Escala para caber na largura disponível
+        let escala = containerWidth / maxBinWidth;
+        if (escala > 1) escala = 1; // não ampliar demais
+
+        canvas.width = maxBinWidth * escala + 240; // espaço para labels
         canvas.height = totalHeight * escala + 40;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.textAlign = 'center';
@@ -604,7 +777,7 @@
     function atualizarEstatisticas(planos) {
         let ch = 0, aTotal = 0, aUsada = 0;
         planos.forEach(p => p.bins.forEach(b => { ch++; aTotal += b.width * b.height; aUsada += b.pecas.reduce((s, p) => s + p.width * p.height, 0); }));
-        document.getElementById('estatisticas').innerHTML = `Chapas: ${ch} | Área total: ${(aTotal / 1e6).toFixed(3)} m² | Aproveitamento geral: ${((aUsada / aTotal) * 100).toFixed(1)}%`;
+        document.getElementById('estatisticas').innerHTML = `Chapas: ${ch} | Área total: ${(aTotal / 1e6).toFixed(3)} m² | Aproveitamento: ${((aUsada / aTotal) * 100).toFixed(1)}%`;
     }
 
     // ========== SALVAR / CARREGAR ==========
@@ -633,7 +806,7 @@
         alert('Projeto carregado.');
     }
 
-    // ========== PDF ==========
+    // ========== PDF (retrato otimizado) ==========
     function exportarPDF() {
         if (!melhorSolucaoGlobal || !canvas) { alert('Otimize primeiro.'); return; }
         const { jsPDF } = window.jspdf;
