@@ -1,0 +1,6 @@
+{
+  "appId": "br.com.meunome.otimizadorcorte",
+  "appName": "Otimizador de Corte",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

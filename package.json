@@ -1,0 +1,16 @@
+{
+  "name": "otimizador-corte",
+  "version": "1.0.0",
+  "description": "Aplicativo para otimização de cortes em chapas planas",
+  "scripts": {
+    "cap:add": "npx cap add android",
+    "cap:sync": "npx cap sync"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/android": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}
