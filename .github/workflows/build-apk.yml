@@ -2,7 +2,7 @@ name: Build APK Android
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -27,29 +27,29 @@ jobs:
     - name: Instalar dependências Node
       run: npm install
 
-    - name: Criar diretório de assets
-      run: mkdir -p www/assets/js
+    - name: Conferir se o jsPDF está embutido no projeto
+      run: |
+        test -s www/assets/js/jspdf.umd.min.js
+        head -c 200 www/assets/js/jspdf.umd.min.js | grep -qi "jspdf" \
+          || { echo "ERRO: jspdf.umd.min.js parece inválido"; exit 1; }
 
-    - name: Baixar jsPDF (offline)
-      run: curl -L -o www/assets/js/jspdf.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
-
-    - name: Adicionar plataforma Android (se necessário)
+    - name: Adicionar plataforma Android
       run: npx cap add android
 
-    - name: Gerar ícones Android
+    - name: Gerar ícones e splash a partir de assets/
       run: npx @capacitor/assets generate --android
 
-    - name: Sincronizar web assets com Android
+    - name: Sincronizar web assets e plugins com o Android
       run: npx cap sync android
 
     - name: Dar permissão de execução ao Gradle
       run: chmod +x android/gradlew
 
     - name: Compilar APK de debug
-      run: cd android && ./gradlew assembleDebug
+      run: cd android && ./gradlew assembleDebug --stacktrace
 
     - name: Fazer upload do APK
       uses: actions/upload-artifact@v4
       with:
-        name: OtimizadorCorte-debug.apk
+        name: OtimizadorCorte-debug-apk
         path: android/app/build/outputs/apk/debug/app-debug.apk

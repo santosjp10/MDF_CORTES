@@ -2,3 +2,6 @@ node_modules/
 android/
 .cache/
 *.log
+*.apk
+*.zip
+.DS_Store

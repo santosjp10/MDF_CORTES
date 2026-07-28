@@ -1,6 +1,8 @@
 {
-  "appId": "br.com.meunome.otimizadorcorte",
-  "appName": "Otimizador de Corte",
+  "appId": "br.com.jps.otimizadorcorte",
+  "appName": "JPS Otimizador de Corte",
   "webDir": "www",
-  "bundledWebRuntime": false
+  "android": {
+    "allowMixedContent": false
+  }
 }

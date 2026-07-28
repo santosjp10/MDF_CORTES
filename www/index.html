@@ -380,6 +380,61 @@
         document.getElementById('resultadoPanel').style.display = 'none';
     }
 
+    // ========== SALVAMENTO DE ARQUIVOS (nativo Android + navegador) ==========
+    // No APK (WebView do Capacitor) o truque de <a download> NAO funciona.
+    // Aqui gravamos o arquivo com o Filesystem e abrimos a folha de
+    // compartilhamento do Android para o usuario escolher onde salvar/enviar.
+    function ehNativo() {
+        return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    }
+
+    function textoParaBase64(texto) {
+        const bytes = new TextEncoder().encode(texto);
+        let bin = '';
+        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+        return btoa(bin);
+    }
+
+    async function salvarArquivo(nomeArquivo, base64, mimeType, titulo) {
+        if (ehNativo()) {
+            const { Filesystem, Share } = window.Capacitor.Plugins;
+            if (!Filesystem) throw new Error('Plugin Filesystem indisponivel. Recompile o APK.');
+            const res = await Filesystem.writeFile({
+                path: nomeArquivo,
+                data: base64,
+                directory: 'DOCUMENTS',
+                recursive: true
+            });
+            try {
+                await Share.share({
+                    title: titulo || nomeArquivo,
+                    url: res.uri,
+                    dialogTitle: 'Salvar ou compartilhar'
+                });
+            } catch (e) {
+                // usuario cancelou o compartilhamento, ou o plugin falhou:
+                // o arquivo ja esta gravado, entao apenas informamos o caminho
+                if (!/cancel/i.test(String(e && e.message))) {
+                    alert('Arquivo salvo em Documentos:\n' + nomeArquivo);
+                }
+            }
+            return;
+        }
+        // Navegador comum
+        const bin = atob(base64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const blob = new Blob([bytes], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = nomeArquivo;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+
     // ========== CSV ==========
     function exportarCSV(tipo) {
         let csvContent = '';
@@ -395,13 +450,10 @@
             pecas.forEach(p => csvContent += `"${p.nome}",${p.largura},${p.comprimento},${p.quantidade},${p.espessura},${p.orientacao}\n`);
             filename = 'pecas.csv';
         }
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // BOM para o Excel reconhecer o UTF-8
+        const base64 = textoParaBase64('\uFEFF' + csvContent);
+        salvarArquivo(filename, base64, 'text/csv;charset=utf-8;', 'Exportar ' + tipo)
+            .catch(err => alert('Falha ao exportar CSV:\n' + (err && err.message ? err.message : err)));
     }
 
     function importarCSV(tipo) {
@@ -807,8 +859,20 @@
     }
 
     // ========== PDF (retrato otimizado) ==========
-    function exportarPDF() {
+    async function exportarPDF() {
+        try {
+            await gerarPDF();
+        } catch (err) {
+            console.error(err);
+            alert('Falha ao gerar o PDF:\n' + (err && err.message ? err.message : err));
+        }
+    }
+
+    async function gerarPDF() {
         if (!melhorSolucaoGlobal || !canvas) { alert('Otimize primeiro.'); return; }
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            throw new Error('A biblioteca jsPDF nao foi carregada (assets/js/jspdf.umd.min.js).');
+        }
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
         const pageWidth = doc.internal.pageSize.getWidth();
@@ -853,7 +917,8 @@
                 yDetalhe += 2;
             });
         });
-        doc.save('plano_corte.pdf');
+        const base64 = doc.output('datauristring').split(',')[1];
+        await salvarArquivo('plano_corte.pdf', base64, 'application/pdf', 'Plano de Corte');
     }
 
     // Inicial
